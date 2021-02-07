@@ -3,10 +3,11 @@ package avrodict
 import (
 	"sync"
 	"sync/atomic"
+	"regexp"
 	"unicode"
 
 	"github.com/sarim/avro-go/avroregex"
-	"github.com/sarim/gtre"
+	// "github.com/sarim/gtre"
 )
 
 type Searcher struct {
@@ -80,7 +81,8 @@ func (avro *Searcher) Search(enText string) []string {
 		return []string{}
 	}
 	//TODO: Handle error here
-	re := gtre.Parse([]rune(pattern))
+	// re := gtre.Parse([]rune(pattern))
+	re := regexp.MustCompile(pattern)
 
 	var count int32 = 0
 	ch := make(chan string, 30)
@@ -94,8 +96,10 @@ func (avro *Searcher) Search(enText string) []string {
 			go func(wg *sync.WaitGroup, i int) {
 
 				for _, word := range wordChunk[i] {
-					if re.Match(word) {
-						ch <- string(word)
+					// if re.Match(word) {
+					sWord := string(word)
+					if re.MatchString(sWord) {
+						ch <- sWord
 						atomic.AddInt32(&count, 1)
 					}
 				}
